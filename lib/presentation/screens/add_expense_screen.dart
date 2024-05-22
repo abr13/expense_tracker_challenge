@@ -19,27 +19,23 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   late String _description;
   late double _amount;
   late DateTime _date;
-  late FocusNode
-      _descriptionFocusNode; // Added focus node for description field
 
   @override
   void initState() {
     super.initState();
-    _descriptionFocusNode = FocusNode(); // Initialize focus node
     if (widget.expense != null) {
       _description = widget.expense!.description;
       _amount = widget.expense!.amount;
       _date = widget.expense!.date;
     } else {
       _description = '';
-      _amount = 0.0;
+      _amount = 0;
       _date = DateTime.now();
     }
   }
 
   @override
   void dispose() {
-    _descriptionFocusNode.dispose(); // Dispose focus node
     super.dispose();
   }
 
@@ -59,6 +55,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
           child: ListView(
             children: [
               TextFormField(
+                initialValue: _amount != 0 ? _amount.toString() : '',
                 decoration: const InputDecoration(
                   border: OutlineInputBorder(),
                   hintText: "100",
@@ -94,10 +91,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   _description = value!;
                 },
                 textCapitalization: TextCapitalization.sentences,
-                // Sentence capitalization
-                focusNode: _descriptionFocusNode,
-                // Assign focus node
-                autofocus: false, // Autofocus on description field
+                autofocus: false,
               ),
               const SizedBox(height: 12),
               ElevatedButton.icon(

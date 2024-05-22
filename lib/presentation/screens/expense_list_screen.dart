@@ -2,15 +2,42 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
+import '../../domain/entities/expense.dart';
 import '../providers/expense_provider.dart';
 import 'add_expense_screen.dart';
 
-class ExpenseListScreen extends StatelessWidget {
+enum SortOption {
+  ByDateAscending,
+  ByDateDescending,
+}
+
+class ExpenseListScreen extends StatefulWidget {
   const ExpenseListScreen({super.key});
+
+  @override
+  _ExpenseListScreenState createState() => _ExpenseListScreenState();
+}
+
+class _ExpenseListScreenState extends State<ExpenseListScreen> {
+  SortOption _sortOption = SortOption.ByDateDescending;
+  late DateTime _selectedDate;
+  bool _isFiltering = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedDate = DateTime.now();
+  }
 
   @override
   Widget build(BuildContext context) {
     final expenseProvider = Provider.of<ExpenseProvider>(context);
+
+    List<Expense> sortedExpenses = _sortExpenses(expenseProvider.expenses);
+
+    if (_isFiltering) {
+      sortedExpenses = _filterExpenses(expenseProvider.expenses);
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -19,6 +46,55 @@ class ExpenseListScreen extends StatelessWidget {
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
         centerTitle: true,
+        actions: [
+          PopupMenuButton<SortOption>(
+            onSelected: (option) {
+              setState(() {
+                _sortOption = option;
+                sortedExpenses = _sortExpenses(expenseProvider.expenses);
+              });
+            },
+            itemBuilder: (BuildContext context) => <PopupMenuEntry<SortOption>>[
+              const PopupMenuItem<SortOption>(
+                value: SortOption.ByDateDescending,
+                child: Text('Sort by Date (Newest First)'),
+              ),
+              const PopupMenuItem<SortOption>(
+                value: SortOption.ByDateAscending,
+                child: Text('Sort by Date (Oldest First)'),
+              ),
+            ],
+          ),
+          IconButton(
+            icon: _isFiltering
+                ? const Icon(Icons.filter_alt)
+                : const Icon(Icons.filter_alt_outlined),
+            onPressed: () async {
+              final DateTime? pickedDate = await showDatePicker(
+                context: context,
+                initialDate: _selectedDate,
+                firstDate: DateTime(2000),
+                lastDate: DateTime.now(),
+              );
+              if (pickedDate != null) {
+                setState(() {
+                  _selectedDate = pickedDate;
+                  _isFiltering = true;
+                });
+              }
+            },
+          ),
+          if (_isFiltering)
+            IconButton(
+              icon: const Icon(Icons.clear),
+              onPressed: () {
+                setState(() {
+                  _isFiltering = false;
+                  sortedExpenses = _sortExpenses(expenseProvider.expenses);
+                });
+              },
+            ),
+        ],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -26,7 +102,9 @@ class ExpenseListScreen extends StatelessWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Text(
-              'Your Expenses',
+              _isFiltering
+                  ? 'Filtered Expenses for ${DateFormat('dd/MM/yyyy').format(_selectedDate)}'
+                  : 'All Expenses',
               style: Theme.of(context).textTheme.headline6!.copyWith(
                     color: Colors.indigo,
                     fontWeight: FontWeight.bold,
@@ -34,7 +112,7 @@ class ExpenseListScreen extends StatelessWidget {
             ),
             const SizedBox(height: 16),
             Expanded(
-              child: expenseProvider.expenses.isEmpty
+              child: sortedExpenses.isEmpty
                   ? Center(
                       child: Text(
                         'No expenses found',
@@ -45,9 +123,9 @@ class ExpenseListScreen extends StatelessWidget {
                       ),
                     )
                   : ListView.builder(
-                      itemCount: expenseProvider.expenses.length,
+                      itemCount: sortedExpenses.length,
                       itemBuilder: (context, index) {
-                        final expense = expenseProvider.expenses[index];
+                        final expense = sortedExpenses[index];
                         return Card(
                           elevation: 4,
                           margin: const EdgeInsets.symmetric(vertical: 8),
@@ -88,12 +166,30 @@ class ExpenseListScreen extends StatelessWidget {
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AddExpenseScreen(),
+              builder: (context) => const AddExpenseScreen(),
             ),
           );
         },
         child: const Icon(Icons.add),
       ),
     );
+  }
+
+  List<Expense> _sortExpenses(List<Expense> expenses) {
+    switch (_sortOption) {
+      case SortOption.ByDateAscending:
+        return expenses.toList()..sort((a, b) => a.date.compareTo(b.date));
+      case SortOption.ByDateDescending:
+        return expenses.toList()..sort((a, b) => b.date.compareTo(a.date));
+    }
+  }
+
+  List<Expense> _filterExpenses(List<Expense> expenses) {
+    return expenses
+        .where((expense) =>
+            _selectedDate.year == expense.date.year &&
+            _selectedDate.month == expense.date.month &&
+            _selectedDate.day == expense.date.day)
+        .toList();
   }
 }
