@@ -26,10 +26,16 @@ void main() {
     deleteExpenseUseCase = DeleteExpense(mockExpenseRepository);
   });
 
-  final expense = Expense(id: 1, description: 'Test', amount: 100.0, date: DateTime.now());
+  final expense = Expense(
+      id: 1,
+      description: 'Test',
+      amount: 100.0,
+      date: DateTime.now(),
+      type: 'Food');
 
   test('AddExpense use case', () async {
-    when(mockExpenseRepository.addExpense(expense)).thenAnswer((_) async => null);
+    when(mockExpenseRepository.addExpense(expense))
+        .thenAnswer((_) async => null);
 
     await addExpenseUseCase(expense);
 
@@ -37,7 +43,8 @@ void main() {
   });
 
   test('FetchExpenses use case', () async {
-    when(mockExpenseRepository.fetchExpenses()).thenAnswer((_) async => [expense]);
+    when(mockExpenseRepository.fetchExpenses())
+        .thenAnswer((_) async => [expense]);
 
     final result = await fetchExpensesUseCase();
 
@@ -46,7 +53,8 @@ void main() {
   });
 
   test('UpdateExpense use case', () async {
-    when(mockExpenseRepository.updateExpense(expense)).thenAnswer((_) async => null);
+    when(mockExpenseRepository.updateExpense(expense))
+        .thenAnswer((_) async => null);
 
     await updateExpenseUseCase(expense);
 
@@ -54,12 +62,11 @@ void main() {
   });
 
   test('DeleteExpense use case', () async {
-    when(mockExpenseRepository.deleteExpense(expense.id)).thenAnswer((_) async => null);
+    when(mockExpenseRepository.deleteExpense(expense.id))
+        .thenAnswer((_) async => null);
 
     await deleteExpenseUseCase(expense.id);
 
     verify(mockExpenseRepository.deleteExpense(expense.id)).called(1);
   });
 }
-
-

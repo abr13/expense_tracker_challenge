@@ -22,7 +22,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   late String _type;
 
   // List of expense types
-  final List<String> _expenseTypes = ['Food', 'Transport', 'Entertainment', 'Bills', 'Other'];
+  final List<String> _expenseTypes = [
+    'Food',
+    'Transport',
+    'Entertainment',
+    'Bills',
+    'Other'
+  ];
 
   @override
   void initState() {
@@ -47,7 +53,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.expense != null ? 'Edit Expense' : 'Add Expense'),
-        backgroundColor: Colors.lightBlue[700],
+        backgroundColor: Colors.lightBlue[300],
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -143,7 +149,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   style: const TextStyle(color: Colors.white),
                 ),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.lightBlue[700],
+                  backgroundColor: Colors.lightBlue[400],
                 ),
               ),
               const SizedBox(height: 20),
@@ -171,8 +177,9 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                   }
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                  widget.expense != null ? Colors.orange : Colors.green,
+                  backgroundColor: widget.expense != null
+                      ? Colors.orange[300]
+                      : Colors.green[300],
                 ),
                 child: Text(
                   widget.expense != null ? 'Update' : 'Add',

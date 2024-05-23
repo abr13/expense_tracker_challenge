@@ -11,7 +11,6 @@ import 'package:mockito/mockito.dart';
 
 import 'expense_provider_test.mocks.dart';
 
-
 @GenerateMocks([ExpenseRepository])
 void main() {
   late MockExpenseRepository mockExpenseRepository;
@@ -45,11 +44,18 @@ void main() {
   });
 
   test('adds an expense', () async {
-    final expense = Expense(id: 1, description: 'Test', amount: 100.0, date: DateTime.now());
+    final expense = Expense(
+        id: 1,
+        description: 'Test',
+        amount: 100.0,
+        date: DateTime.now(),
+        type: 'Food');
 
     // Stubs for this test
-    when(mockExpenseRepository.addExpense(expense)).thenAnswer((_) async => null);
-    when(mockExpenseRepository.fetchExpenses()).thenAnswer((_) async => [expense]);
+    when(mockExpenseRepository.addExpense(expense))
+        .thenAnswer((_) async => null);
+    when(mockExpenseRepository.fetchExpenses())
+        .thenAnswer((_) async => [expense]);
 
     await expenseProvider.addExpense(expense);
 
@@ -59,11 +65,18 @@ void main() {
   });
 
   test('updates an expense', () async {
-    final expense = Expense(id: 1, description: 'Test', amount: 100.0, date: DateTime.now());
+    final expense = Expense(
+        id: 1,
+        description: 'Test',
+        amount: 100.0,
+        date: DateTime.now(),
+        type: 'Food');
 
     // Stubs for this test
-    when(mockExpenseRepository.updateExpense(expense)).thenAnswer((_) async => null);
-    when(mockExpenseRepository.fetchExpenses()).thenAnswer((_) async => [expense]);
+    when(mockExpenseRepository.updateExpense(expense))
+        .thenAnswer((_) async => null);
+    when(mockExpenseRepository.fetchExpenses())
+        .thenAnswer((_) async => [expense]);
 
     await expenseProvider.updateExpense(expense);
 
@@ -73,10 +86,16 @@ void main() {
   });
 
   test('deletes an expense', () async {
-    final expense = Expense(id: 1, description: 'Test', amount: 100.0, date: DateTime.now());
+    final expense = Expense(
+        id: 1,
+        description: 'Test',
+        amount: 100.0,
+        date: DateTime.now(),
+        type: 'Food');
 
     // Stubs for this test
-    when(mockExpenseRepository.deleteExpense(expense.id)).thenAnswer((_) async => null);
+    when(mockExpenseRepository.deleteExpense(expense.id))
+        .thenAnswer((_) async => null);
     when(mockExpenseRepository.fetchExpenses()).thenAnswer((_) async => []);
 
     await expenseProvider.deleteExpense(expense.id);
@@ -86,4 +105,3 @@ void main() {
     verify(mockExpenseRepository.fetchExpenses()).called(2);
   });
 }
-

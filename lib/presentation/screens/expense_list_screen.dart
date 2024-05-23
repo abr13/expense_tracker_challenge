@@ -23,6 +23,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   SortOption _sortOption = SortOption.ByDateDescending;
   late DateTime _selectedDate;
   bool _isFiltering = false;
+  bool _isWeeklySummary = true;
 
   @override
   void initState() {
@@ -115,7 +116,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                   ),
             ),
             const SizedBox(height: 16),
-            _buildSummaryChart(summaries),
+            _buildSummaryChart(summaries, expenseProvider.expenses),
             const SizedBox(height: 16),
             Expanded(
               child: sortedExpenses.isEmpty
@@ -133,6 +134,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                       itemBuilder: (context, index) {
                         final expense = sortedExpenses[index];
                         return Card(
+                          color: _getTypeColor(expense.type),
                           elevation: 4,
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
@@ -142,7 +144,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                                   const TextStyle(fontWeight: FontWeight.bold),
                             ),
                             subtitle: Text(
-                              '₹${expense.amount.toStringAsFixed(2)} - ${DateFormat('dd/MM/yyyy hh:mm a').format(expense.date.toLocal())}',
+                              '₹${expense.amount.toStringAsFixed(2)} - ${DateFormat('dd/MM/yyyy').format(expense.date.toLocal())}',
                               style: TextStyle(
                                 color: Colors.grey[700],
                               ),
@@ -211,52 +213,110 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
   }
 
   Map<String, double> _calculateSummaries(List<Expense> expenses) {
-    Map<String, double> summaries = {};
-
-    for (Expense expense in expenses) {
-      summaries[expense.type] = (summaries[expense.type] ?? 0) + expense.amount;
+    if (_isWeeklySummary) {
+      return _calculateWeeklySummaries(expenses);
+    } else {
+      return _calculateMonthlySummaries(expenses);
     }
+  }
 
+  Map<String, double> _calculateWeeklySummaries(List<Expense> expenses) {
+    Map<String, double> summaries = {};
+    DateTime currentDate = DateTime.now();
+    DateTime startOfWeek =
+        currentDate.subtract(Duration(days: currentDate.weekday - 1));
+    DateTime endOfWeek = startOfWeek.add(const Duration(days: 6));
+
+    // Iterate through expenses and aggregate amounts for each category within the week
+    for (Expense expense in expenses) {
+      if (expense.date.isAfter(startOfWeek) &&
+          expense.date.isBefore(endOfWeek)) {
+        summaries[expense.type] =
+            (summaries[expense.type] ?? 0) + expense.amount;
+      }
+    }
     return summaries;
   }
 
-  Widget _buildSummaryChart(Map<String, double> summaries) {
-    return SizedBox(
-      height: 200,
-      child: PieChart(
-        PieChartData(
-          sections: summaries.entries.map((entry) {
-            final color = _getTypeColor(entry.key);
-            return PieChartSectionData(
-              color: color,
-              value: entry.value,
-              title: '${entry.key}\n₹${entry.value.toStringAsFixed(0)}',
-              titleStyle: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-            );
-          }).toList(),
-          sectionsSpace: 4,
-          centerSpaceRadius: 40,
+  Map<String, double> _calculateMonthlySummaries(List<Expense> expenses) {
+    Map<String, double> summaries = {};
+    DateTime currentDate = DateTime.now();
+    DateTime startOfMonth = DateTime(currentDate.year, currentDate.month, 1);
+    DateTime endOfMonth = DateTime(currentDate.year, currentDate.month + 1, 0);
+
+    // Iterate through expenses and aggregate amounts for each category within the month
+    for (Expense expense in expenses) {
+      if (expense.date.isAfter(startOfMonth) &&
+          expense.date.isBefore(endOfMonth)) {
+        summaries[expense.type] =
+            (summaries[expense.type] ?? 0) + expense.amount;
+      }
+    }
+    return summaries;
+  }
+
+  Widget _buildSummaryChart(
+      Map<String, double> summaries, List<Expense> expenses) {
+    return Column(
+      children: [
+        ToggleButtons(
+          isSelected: [_isWeeklySummary, !_isWeeklySummary],
+          onPressed: (index) {
+            setState(() {
+              _isWeeklySummary = index == 0;
+              // Update the summaries based on the selected option
+              summaries = _calculateSummaries(expenses);
+            });
+          },
+          children: const [
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text('Weekly'),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16.0),
+              child: Text('Monthly'),
+            ),
+          ],
         ),
-      ),
+        SizedBox(
+          height: 200,
+          child: PieChart(
+            PieChartData(
+              sections: summaries.entries.map((entry) {
+                final color = _getTypeColor(entry.key);
+                return PieChartSectionData(
+                  color: color,
+                  value: entry.value,
+                  title: '${entry.key}\n₹${entry.value.toStringAsFixed(0)}',
+                  titleStyle: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                );
+              }).toList(),
+              sectionsSpace: 4,
+              centerSpaceRadius: 40,
+            ),
+          ),
+        ),
+      ],
     );
   }
 
-  Color _getTypeColor(String type) {
+  Color? _getTypeColor(String type) {
     switch (type) {
       case 'Food':
-        return Colors.blue;
+        return Colors.blue[300];
       case 'Transport':
-        return Colors.green;
+        return Colors.green[300];
       case 'Shopping':
-        return Colors.orange;
+        return Colors.orange[300];
       case 'Entertainment':
-        return Colors.red;
+        return Colors.red[300];
       default:
-        return Colors.grey;
+        return Colors.grey[300];
     }
   }
 
