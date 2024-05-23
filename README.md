@@ -14,7 +14,9 @@ The Expense Tracker app helps users manage their expenses by allowing them to ad
 
 ## Screenshots
 - *Expense List Screen:* Displays a list of all expenses with options to edit or delete each expense.
+- <img src="screenshots/img_1.png" height="500"/> 
 - *Add/Edit Expense Screen:* Allows users to add a new expense or edit an existing one by entering the description, amount, and date.
+- <img src="screenshots/img.png" height="500"/> 
 
 ## Usage
 1. Clone the repository to your local machine.
@@ -25,6 +27,9 @@ The Expense Tracker app helps users manage their expenses by allowing them to ad
 - `flutter/material.dart`: Flutter framework for building UI.
 - `intl/intl.dart`: Package for date formatting.
 - `provider/provider.dart`: Flutter package for state management.
+- `package:flutter_local_notifications/flutter_local_notifications.dart`: Flutter package for local notification.
+- `package:fl_chart/fl_chart.dart`: Flutter package for pie chart.
+- `package:permission_handler/permission_handler.dart`: Flutter package for notification permission.
 
 ## Installation
 To install the dependencies, run the following command:
