@@ -19,6 +19,10 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
   late String _description;
   late double _amount;
   late DateTime _date;
+  late String _type;
+
+  // List of expense types
+  final List<String> _expenseTypes = ['Food', 'Transport', 'Entertainment', 'Bills', 'Other'];
 
   @override
   void initState() {
@@ -27,16 +31,13 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
       _description = widget.expense!.description;
       _amount = widget.expense!.amount;
       _date = widget.expense!.date;
+      _type = widget.expense!.type;
     } else {
       _description = '';
       _amount = 0;
       _date = DateTime.now();
+      _type = _expenseTypes.first;
     }
-  }
-
-  @override
-  void dispose() {
-    super.dispose();
   }
 
   @override
@@ -94,6 +95,34 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 autofocus: false,
               ),
               const SizedBox(height: 12),
+              DropdownButtonFormField<String>(
+                value: _type,
+                decoration: const InputDecoration(
+                  labelText: 'Type',
+                  border: OutlineInputBorder(),
+                ),
+                items: _expenseTypes.map((type) {
+                  return DropdownMenuItem(
+                    value: type,
+                    child: Text(type),
+                  );
+                }).toList(),
+                onChanged: (value) {
+                  setState(() {
+                    _type = value!;
+                  });
+                },
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please select a type';
+                  }
+                  return null;
+                },
+                onSaved: (value) {
+                  _type = value!;
+                },
+              ),
+              const SizedBox(height: 12),
               ElevatedButton.icon(
                 onPressed: () async {
                   final selectedDate = await showDatePicker(
@@ -129,6 +158,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                       description: _description,
                       amount: _amount,
                       date: _date,
+                      type: _type, // Save the type
                     );
 
                     if (widget.expense != null) {
@@ -142,7 +172,7 @@ class _AddExpenseScreenState extends State<AddExpenseScreen> {
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor:
-                      widget.expense != null ? Colors.orange : Colors.green,
+                  widget.expense != null ? Colors.orange : Colors.green,
                 ),
                 child: Text(
                   widget.expense != null ? 'Update' : 'Add',

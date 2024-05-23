@@ -15,6 +15,7 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       description: expense.description,
       amount: expense.amount,
       date: expense.date,
+      type: expense.type,
     );
     await localDataSource.addExpense(model);
   }
@@ -27,12 +28,15 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
   @override
   Future<List<Expense>> fetchExpenses() async {
     final models = await localDataSource.fetchExpenses();
-    return models.map((model) => Expense(
-      id: model.id,
-      description: model.description,
-      amount: model.amount,
-      date: model.date,
-    )).toList();
+    return models
+        .map((model) => Expense(
+              id: model.id,
+              description: model.description,
+              amount: model.amount,
+              date: model.date,
+              type: model.type,
+            ))
+        .toList();
   }
 
   @override
@@ -42,8 +46,8 @@ class ExpenseRepositoryImpl implements ExpenseRepository {
       description: expense.description,
       amount: expense.amount,
       date: expense.date,
+      type: expense.type,
     );
     await localDataSource.updateExpense(model);
   }
 }
-

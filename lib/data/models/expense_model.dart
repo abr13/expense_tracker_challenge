@@ -3,8 +3,14 @@ class ExpenseModel {
   final String description;
   final double amount;
   final DateTime date;
+  final String type;
 
-  ExpenseModel({required this.id, required this.description, required this.amount, required this.date});
+  ExpenseModel(
+      {required this.id,
+      required this.description,
+      required this.amount,
+      required this.date,
+      required this.type});
 
   factory ExpenseModel.fromMap(Map<String, dynamic> map) {
     return ExpenseModel(
@@ -12,6 +18,7 @@ class ExpenseModel {
       description: map['description'],
       amount: map['amount'],
       date: DateTime.parse(map['date']),
+      type: map['type'],
     );
   }
 
@@ -21,6 +28,7 @@ class ExpenseModel {
       'description': description,
       'amount': amount,
       'date': date.toIso8601String(),
+      'type': type,
     };
   }
 }

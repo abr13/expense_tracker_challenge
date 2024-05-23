@@ -1,3 +1,4 @@
+import 'package:fl_chart/fl_chart.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
@@ -38,6 +39,9 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
     if (_isFiltering) {
       sortedExpenses = _filterExpenses(expenseProvider.expenses);
     }
+
+    Map<String, double> summaries =
+        _calculateSummaries(expenseProvider.expenses);
 
     return Scaffold(
       appBar: AppBar(
@@ -111,6 +115,8 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                   ),
             ),
             const SizedBox(height: 16),
+            _buildSummaryChart(summaries),
+            const SizedBox(height: 16),
             Expanded(
               child: sortedExpenses.isEmpty
                   ? Center(
@@ -141,17 +147,28 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                                 color: Colors.grey[700],
                               ),
                             ),
-                            trailing: IconButton(
-                              icon: const Icon(Icons.edit),
-                              onPressed: () {
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) =>
-                                        AddExpenseScreen(expense: expense),
-                                  ),
-                                );
-                              },
+                            trailing: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                IconButton(
+                                  icon: const Icon(Icons.edit),
+                                  onPressed: () {
+                                    Navigator.push(
+                                      context,
+                                      MaterialPageRoute(
+                                        builder: (context) =>
+                                            AddExpenseScreen(expense: expense),
+                                      ),
+                                    );
+                                  },
+                                ),
+                                IconButton(
+                                  icon: const Icon(Icons.delete),
+                                  onPressed: () {
+                                    _showDeleteConfirmationDialog(expense.id);
+                                  },
+                                ),
+                              ],
                             ),
                           ),
                         );
@@ -191,5 +208,83 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
             _selectedDate.month == expense.date.month &&
             _selectedDate.day == expense.date.day)
         .toList();
+  }
+
+  Map<String, double> _calculateSummaries(List<Expense> expenses) {
+    Map<String, double> summaries = {};
+
+    for (Expense expense in expenses) {
+      summaries[expense.type] = (summaries[expense.type] ?? 0) + expense.amount;
+    }
+
+    return summaries;
+  }
+
+  Widget _buildSummaryChart(Map<String, double> summaries) {
+    return SizedBox(
+      height: 200,
+      child: PieChart(
+        PieChartData(
+          sections: summaries.entries.map((entry) {
+            final color = _getTypeColor(entry.key);
+            return PieChartSectionData(
+              color: color,
+              value: entry.value,
+              title: '${entry.key}\n₹${entry.value.toStringAsFixed(0)}',
+              titleStyle: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            );
+          }).toList(),
+          sectionsSpace: 4,
+          centerSpaceRadius: 40,
+        ),
+      ),
+    );
+  }
+
+  Color _getTypeColor(String type) {
+    switch (type) {
+      case 'Food':
+        return Colors.blue;
+      case 'Transport':
+        return Colors.green;
+      case 'Shopping':
+        return Colors.orange;
+      case 'Entertainment':
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
+  void _showDeleteConfirmationDialog(int expenseId) {
+    showDialog(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete Expense'),
+          content: const Text('Are you sure you want to delete this expense?'),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.pop(context);
+              },
+              child: const Text('Cancel'),
+            ),
+            TextButton(
+              onPressed: () {
+                Provider.of<ExpenseProvider>(context, listen: false)
+                    .deleteExpense(expenseId);
+                Navigator.pop(context);
+              },
+              child: const Text('Delete'),
+            ),
+          ],
+        );
+      },
+    );
   }
 }
