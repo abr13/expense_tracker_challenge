@@ -50,7 +50,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
           'Expense Tracker',
           style: TextStyle(fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
+        centerTitle: false,
         actions: [
           PopupMenuButton<SortOption>(
             onSelected: (option) {
@@ -135,7 +135,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                         final expense = sortedExpenses[index];
                         return Card(
                           color: _getTypeColor(expense.type),
-                          elevation: 4,
+                          elevation: 1,
                           margin: const EdgeInsets.symmetric(vertical: 8),
                           child: ListTile(
                             title: Text(
@@ -146,7 +146,7 @@ class _ExpenseListScreenState extends State<ExpenseListScreen> {
                             subtitle: Text(
                               '₹${expense.amount.toStringAsFixed(2)} - ${DateFormat('dd/MM/yyyy').format(expense.date.toLocal())}',
                               style: TextStyle(
-                                color: Colors.grey[700],
+                                color: Colors.grey[900],
                               ),
                             ),
                             trailing: Row(
